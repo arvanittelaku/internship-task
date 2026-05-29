@@ -3,14 +3,13 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const fetch = require("node-fetch");
 const Groq = require("groq-sdk");
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const GITHUB_TIMEOUT_MS = 5000;
+const GITHUB_TIMEOUT_MS = 10000;
 const RATE_LIMIT_MAX = 10;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
@@ -67,11 +66,10 @@ async function githubFetch(url) {
   const timeoutId = setTimeout(() => controller.abort(), GITHUB_TIMEOUT_MS);
 
   try {
-    const res = await fetch(url, {
+    return await fetch(url, {
       headers: githubHeaders(),
       signal: controller.signal,
     });
-    return res;
   } catch (err) {
     if (err.name === "AbortError") {
       const timeoutErr = new Error("GitHub request timed out");
@@ -82,6 +80,28 @@ async function githubFetch(url) {
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+function githubApiError(res) {
+  const remaining = res.headers.get("x-ratelimit-remaining");
+
+  if (res.status === 403 && remaining === "0") {
+    return {
+      status: 429,
+      error:
+        "GitHub rate limit hit (Render shares IPs). Add GITHUB_TOKEN in Render environment variables.",
+    };
+  }
+
+  if (res.status === 403) {
+    return {
+      status: 403,
+      error: "GitHub access denied. Check your GITHUB_TOKEN on the server.",
+    };
+  }
+
+  console.error("GitHub API error:", res.status, res.statusText);
+  return { status: 500, error: "Failed to fetch GitHub data" };
 }
 
 function buildSummary(profile, repos) {
@@ -172,7 +192,8 @@ app.post("/api/roast", async (req, res) => {
     }
 
     if (!profileRes.ok) {
-      return res.status(500).json({ error: "Failed to fetch GitHub data" });
+      const err = githubApiError(profileRes);
+      return res.status(err.status).json({ error: err.error });
     }
 
     const profile = await profileRes.json();
@@ -182,7 +203,8 @@ app.post("/api/roast", async (req, res) => {
     );
 
     if (!reposRes.ok) {
-      return res.status(500).json({ error: "Failed to fetch GitHub data" });
+      const err = githubApiError(reposRes);
+      return res.status(err.status).json({ error: err.error });
     }
 
     const repos = await reposRes.json();
@@ -210,7 +232,11 @@ app.post("/api/roast", async (req, res) => {
 });
 
 app.get("/health", (_req, res) => {
-  res.json({ ok: true });
+  res.json({
+    ok: true,
+    groqConfigured: Boolean(process.env.GROQ_API_KEY),
+    githubTokenConfigured: Boolean(process.env.GITHUB_TOKEN),
+  });
 });
 
 app.get("/", (_req, res) => {

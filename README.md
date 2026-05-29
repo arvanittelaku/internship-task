@@ -22,7 +22,7 @@ Open `.env` and add your keys:
 | Variable | Required? | Where to get it |
 |----------|-----------|-----------------|
 | `GROQ_API_KEY` | Yes | [console.groq.com](https://console.groq.com/) |
-| `GITHUB_TOKEN` | No (but recommended) | [github.com/settings/tokens](https://github.com/settings/tokens) — no scopes needed for public data; avoids rate limits |
+| `GITHUB_TOKEN` | **Yes on Render** (recommended locally) | [github.com/settings/tokens](https://github.com/settings/tokens) — no scopes needed for public data; **required on Render** because shared IPs hit GitHub rate limits fast |
 
 Then:
 
@@ -32,7 +32,7 @@ npm start
 
 Open **http://localhost:3000** and roast someone. Try `@octocat` if you're feeling gentle.
 
-**Deploy on Replit:** import the repo, add the same secrets, hit Run, deploy, then swap `[REPLIT_URL_HERE]` above with your public URL.
+**Deploy on Render:** import the repo, add `GROQ_API_KEY` and **`GITHUB_TOKEN`** in Environment (both required), hit Deploy. Check https://your-app.onrender.com/health — `githubTokenConfigured` should be `true`.
 
 ---
 
