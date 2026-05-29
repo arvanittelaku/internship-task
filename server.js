@@ -16,9 +16,11 @@ const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 const rateLimitStore = new Map();
 
+const publicPath = path.join(__dirname, "public");
+
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(publicPath));
 
 function getClientIp(req) {
   const forwarded = req.headers["x-forwarded-for"];
@@ -207,6 +209,21 @@ app.post("/api/roast", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`roast-my-github running at http://localhost:${PORT}`);
+app.get("/health", (_req, res) => {
+  res.json({ ok: true });
+});
+
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(publicPath, "index.html"));
+});
+
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({ error: "Not found" });
+  }
+  res.sendFile(path.join(publicPath, "index.html"));
+});
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`roast-my-github running on port ${PORT}`);
 });
