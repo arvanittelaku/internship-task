@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Roast My GitHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="header">
+        <h1>Roast My GitHub 🔥</h1>
+        <p class="subtitle">Enter a GitHub username and get what you deserve</p>
+      </header>
+
+      <main class="main">
+        <form id="roast-form" class="form-card" autocomplete="off">
+          <label class="label" for="username">GitHub username</label>
+          <div class="input-wrap">
+            <span class="input-prefix" aria-hidden="true">@</span>
+            <input
+              id="username"
+              name="username"
+              type="text"
+              placeholder="e.g. torvalds"
+              spellcheck="false"
+              autocapitalize="off"
+              autocomplete="off"
+            />
+          </div>
+
+          <p class="label">Roast style</p>
+          <div class="style-row" role="group" aria-label="Roast style">
+            <button type="button" class="style-pill active" data-style="savage">Savage</button>
+            <button type="button" class="style-pill" data-style="corporate">Corporate</button>
+            <button type="button" class="style-pill" data-style="pirate">Pirate</button>
+            <button type="button" class="style-pill" data-style="haiku">Haiku</button>
+            <button type="button" class="style-pill" data-style="motivational">Motivational</button>
+          </div>
+          <input type="hidden" id="style" name="style" value="savage" />
+
+          <button type="submit" class="btn-roast" id="submit-btn">Roast Me</button>
+        </form>
+
+        <section id="result-section" class="result-section hidden" aria-live="polite">
+          <div id="state-loading" class="state-card loading-card hidden">
+            <div class="spinner" aria-hidden="true"></div>
+            <p id="loading-text">Reading your commit history... 👀</p>
+          </div>
+
+          <div id="state-error" class="state-card error-card hidden" role="alert">
+            <p class="error-icon" aria-hidden="true">😬</p>
+            <h2>Something went wrong</h2>
+            <p id="error-text" class="error-message"></p>
+            <button type="button" class="btn-secondary" id="error-retry">Try again</button>
+          </div>
+
+          <div id="state-roast" class="state-card roast-card hidden">
+            <p class="roast-label">Your roast</p>
+            <div class="terminal-window">
+              <div class="terminal-header" aria-hidden="true">
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
+                <span class="terminal-dot"></span>
+                <span class="terminal-title">roast-output.txt</span>
+              </div>
+              <article id="roast-text" class="roast-text"></article>
+            </div>
+            <div class="roast-actions">
+              <button type="button" class="btn-secondary" id="share-btn">Share</button>
+              <button type="button" class="btn-secondary" id="roast-again">Roast Again</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p>Built with Claude AI + GitHub API</p>
+      </footer>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
